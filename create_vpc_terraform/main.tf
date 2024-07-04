@@ -2,14 +2,14 @@
 resource "aws_vpc" "main" {
   cidr_block = var.vpc_cidr
   tags = {
-    Name = "testVpc"
+    Name = "newsapiVpc"
   }
 }
 
 resource "aws_internet_gateway" "ig" {
   vpc_id = aws_vpc.main.id
   tags = {
-    Name = "test-igw"
+    Name = "newsapi-igw"
   }
 }
 
@@ -17,11 +17,11 @@ resource "aws_subnet" "public_subnet" {
   vpc_id     = aws_vpc.main.id
   count = length(var.public_subnets_cidr)
   cidr_block = element(var.public_subnets_cidr,count.index)
-  availability_zone = "${data.aws_availability_zones.available.names[count.index]}"
+  availability_zone = element(data.aws_availability_zones.available.names, count.index)
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "${data.aws_availability_zones.available.names[count.index]}-public-subnet"
+    Name = "${element(data.aws_availability_zones.available.names, count.index)}-public-subnet"
   }
 }
 
@@ -61,9 +61,9 @@ resource "aws_route_table_association" "public" {
 }
 
 #### Security Group for the vpc
-resource "aws_security_group" "default" {
-  name = "default-sg"
-  description = "default security group"
+resource "aws_security_group" "newsapi_sg" {
+  name = "newsapi-sg"
+  description = "news api security group"
   vpc_id = aws_vpc.main.id
   depends_on = [ aws_vpc.main ]
 
@@ -83,4 +83,17 @@ resource "aws_security_group" "default" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+}
+
+
+
+resource "aws_instance" "newsapi_bastion" {
+  ami = "ami-052387465d846f3fc"
+  instance_type = var.master_instance_type
+  subnet_id = aws_subnet.public_subnet[0].id
+  key_name = "eunorth1"
+  vpc_security_group_ids = [aws_security_group.newsapi_sg.id]
+  tags = {
+    Name = "newsapibastion" 
+    }  
 }

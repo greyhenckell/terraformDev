@@ -22,3 +22,9 @@ variable "private_subnets_cidr" {
     type = list(any)
     description = "list of private subnet ips"
 }
+
+variable "master_instance_type" {
+  type        = string
+  description = "EC2 instance type for the worker nodes."
+  default     = "t3.micro" #t3.medium
+}
