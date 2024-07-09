@@ -28,3 +28,9 @@ variable "master_instance_type" {
   description = "EC2 instance type for the worker nodes."
   default     = "t3.micro" #t3.medium
 }
+
+variable "launch_instance_type" {
+  type        = string
+  description = "EC2 instance type for the worker nodes."
+  default     = "t3.medium" #t3.medium
+}
